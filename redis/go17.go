@@ -1,4 +1,6 @@
 // +build go1.7,!go1.8
+// https://golang.org/cmd/go/#hdr-Build_constraints
+// build constraints
 
 package redis
 

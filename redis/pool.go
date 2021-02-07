@@ -182,6 +182,7 @@ func NewPool(newFn func() (Conn, error), maxIdle int) *Pool {
 // error handling to the first use of the connection. If there is an error
 // getting an underlying connection, then the connection Err, Do, Send, Flush
 // and Receive methods return that error.
+// returns a active connection
 func (p *Pool) Get() Conn {
 	// GetContext returns errorConn in the first argument when an error occurs.
 	c, _ := p.GetContext(context.Background())

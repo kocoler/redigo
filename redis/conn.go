@@ -35,20 +35,21 @@ var (
 )
 
 // conn is the low-level implementation of Conn
+// conn 是 Conn 最基本的实现 -> Conn 接口
 type conn struct {
 	// Shared
 	mu      sync.Mutex
 	pending int
 	err     error
-	conn    net.Conn
+	conn    net.Conn  // net.Conn
 
 	// Read
 	readTimeout time.Duration
-	br          *bufio.Reader
+	br          *bufio.Reader // read buffer
 
 	// Write
 	writeTimeout time.Duration
-	bw           *bufio.Writer
+	bw           *bufio.Writer // write buffer
 
 	// Scratch space for formatting argument length.
 	// '*' or '$', length, "\r\n"
@@ -78,7 +79,7 @@ type dialOptions struct {
 	readTimeout         time.Duration
 	writeTimeout        time.Duration
 	tlsHandshakeTimeout time.Duration
-	dialer              *net.Dialer
+	dialer              *net.Dialer // dialer
 	dialContext         func(ctx context.Context, network, addr string) (net.Conn, error)
 	db                  int
 	username            string
@@ -92,6 +93,7 @@ type dialOptions struct {
 // DialTLSHandshakeTimeout specifies the maximum amount of time waiting to
 // wait for a TLS handshake. Zero means no timeout.
 // If no DialTLSHandshakeTimeout option is specified then the default is 30 seconds.
+// TLS time limit
 func DialTLSHandshakeTimeout(d time.Duration) DialOption {
 	return DialOption{func(do *dialOptions) {
 		do.tlsHandshakeTimeout = d
@@ -99,6 +101,7 @@ func DialTLSHandshakeTimeout(d time.Duration) DialOption {
 }
 
 // DialReadTimeout specifies the timeout for reading a single command reply.
+// dial read time limit
 func DialReadTimeout(d time.Duration) DialOption {
 	return DialOption{func(do *dialOptions) {
 		do.readTimeout = d
@@ -106,6 +109,7 @@ func DialReadTimeout(d time.Duration) DialOption {
 }
 
 // DialWriteTimeout specifies the timeout for writing a single command.
+// dial write time limit
 func DialWriteTimeout(d time.Duration) DialOption {
 	return DialOption{func(do *dialOptions) {
 		do.writeTimeout = d
@@ -115,6 +119,7 @@ func DialWriteTimeout(d time.Duration) DialOption {
 // DialConnectTimeout specifies the timeout for connecting to the Redis server when
 // no DialNetDial option is specified.
 // If no DialConnectTimeout option is specified then the default is 30 seconds.
+// dial time limit
 func DialConnectTimeout(d time.Duration) DialOption {
 	return DialOption{func(do *dialOptions) {
 		do.dialer.Timeout = d
@@ -125,6 +130,7 @@ func DialConnectTimeout(d time.Duration) DialOption {
 // when no DialNetDial option is specified.
 // If zero, keep-alives are not enabled. If no DialKeepAlive option is specified then
 // the default of 5 minutes is used to ensure that half-closed TCP sessions are detected.
+// dial alive time limit
 func DialKeepAlive(d time.Duration) DialOption {
 	return DialOption{func(do *dialOptions) {
 		do.dialer.KeepAlive = d
@@ -152,6 +158,10 @@ func DialContextFunc(f func(ctx context.Context, network, addr string) (net.Conn
 }
 
 // DialDatabase specifies the database to select when dialing a connection.
+// dial db name
+// default 0 - 16
+// modified in config file
+// used in test env
 func DialDatabase(db int) DialOption {
 	return DialOption{func(do *dialOptions) {
 		do.db = db
@@ -160,6 +170,7 @@ func DialDatabase(db int) DialOption {
 
 // DialPassword specifies the password to use when connecting to
 // the Redis server.
+// dial password
 func DialPassword(password string) DialOption {
 	return DialOption{func(do *dialOptions) {
 		do.password = password
@@ -168,6 +179,7 @@ func DialPassword(password string) DialOption {
 
 // DialUsername specifies the username to use when connecting to
 // the Redis server when Redis ACLs are used.
+// dial username
 func DialUsername(username string) DialOption {
 	return DialOption{func(do *dialOptions) {
 		do.username = username
